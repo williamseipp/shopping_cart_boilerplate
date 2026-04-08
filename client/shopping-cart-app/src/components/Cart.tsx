@@ -27,7 +27,7 @@ const Cart = ({ total, cartItems }: CartProps) => {
 
         <tfoot>
           <tr>
-            <td colSpan={3} className="total">Total: $729.98</td>
+            <td colSpan={3} className="total">Total: ${total.toFixed(2)}</td>
           </tr>
         </tfoot>
       </table>

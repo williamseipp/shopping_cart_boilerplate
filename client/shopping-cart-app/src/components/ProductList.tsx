@@ -1,8 +1,8 @@
 import ProductItemRow from './ProductItemRow'
-import type { Product } from '../types/index.ts'
+import type { ProductRecord } from '../types/index.ts'
 
 type ProductListProps = {
-  products: Product[]
+  products: ProductRecord[]
 }
 
 const ProductList = ({ products }: ProductListProps) => {

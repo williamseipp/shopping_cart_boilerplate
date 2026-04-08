@@ -1,7 +1,7 @@
-import type { Product } from '../types/index.ts'
+import type { ProductRecord } from '../types/index.ts'
 
 type EditProductFormProps = {
-  product: Product
+  product: ProductRecord
   onCancel: () => void
 }
 

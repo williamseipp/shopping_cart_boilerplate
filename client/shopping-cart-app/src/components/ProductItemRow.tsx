@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import type { Product } from '../types/index.ts'
+import type { ProductRecord } from '../types/index.ts'
 import EditProductForm from './EditProductForm'
 
 type ProductItemRowProps = {
-  product: Product
+  product: ProductRecord
 }
 
 const ProductItemRow = ({ product }: ProductItemRowProps) => {
