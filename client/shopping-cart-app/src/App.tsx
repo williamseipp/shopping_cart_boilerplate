@@ -6,7 +6,6 @@ import { mockProducts, mockCart } from '../../mockData/data.js'
 
 function App() {
   return (
-
     <div id="app">
       <Header title="the shop!" cartItems={mockCart} />
 
@@ -15,8 +14,7 @@ function App() {
         <AddProductSection />
       </main>
     </div>
-    // implement edit product button click ( edit form should appear below product )
-    // page with _edit form
+    // 
   )
 }
 

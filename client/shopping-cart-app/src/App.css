@@ -173,12 +173,22 @@ input[type="number"] {
   display: none;
 }
 
+.product .edit-form h3,
+.product .edit-form form {
+  display: none;
+}
+
 .add-form.visible .add-product-button {
   display: none;
 }
 
 .add-form.visible h3,
 .add-form.visible form {
+  display: block;
+}
+
+.product .edit-form.visible h3,
+.product .edit-form.visible form {
   display: block;
 }
 
