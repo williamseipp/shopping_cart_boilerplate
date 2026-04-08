@@ -1,16 +1,22 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import Header from './components/Header'
+import ProductList from './components/ProductList'
+import AddProductSection from './components/AddProductSection'
 import './App.css'
+import { mockProducts, mockCart } from '../../mockData/data.js'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <h1> hey </h1>
-    </>
+
+    <div id="app">
+      <Header title="the shop!" cartItems={mockCart} />
+
+      <main>
+        <ProductList products={mockProducts} />
+        <AddProductSection />
+      </main>
+    </div>
+    // implement edit product button click ( edit form should appear below product )
+    // page with _edit form
   )
 }
 
