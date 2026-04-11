@@ -1,59 +1,149 @@
-import React from "react";
-import Header from './components/Header'
-import ProductList from './components/ProductList'
-import AddProductSection from './components/AddProductSection'
-import './App.css'
-import { createProduct, getProducts } from "./services";
-import type { Product, ProductList as ProductListData } from "./types";
-import { ZodError } from "zod";
+import { useEffect, useState } from "react";
+import ToggleableAddProductForm from "./components/ToggleableAddProductForm";
+import ShoppingCart from "./components/ShoppingCart";
+import ProductListing from './components/ProductListing';
+import { Product, CartItem, BaseProduct } from "./types";
+import {
+  getProducts,
+  addProduct,
+  updateProduct,
+  deleteProduct,
+  getCartItems,
+  addToCart,
+  checkout,
+} from "./services/products";
 
 function App() {
-  const [products, setProducts] = React.useState<ProductListData>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchProducts = async () => {
-      try {
-        const data = await getProducts();
-        setProducts(data);
-      } catch (e: unknown) {
-        if (e instanceof ZodError) {
-          console.error("Invalid products response", e.issues);
-          return;
-        }
-
-        console.error(e);
-      }
+      // kass
+      const data = await getProducts();
+      setProducts(data);
+    };
+    const fetchCartItems = async () => {
+      const data = await getCartItems();
+      setCartItems(data);
     };
 
-    void fetchProducts();
+    try {
+      // kass
+      fetchProducts();
+      fetchCartItems();
+    } catch (e) {
+      console.error(e);
+    }
   }, []);
 
-  const handleSubmit = async (
-    newProduct: Product,
-    callback?: () => void,
+
+  const handleUpdateProduct = async (
+    updatedProduct: BaseProduct,
+    productId: string,
+    callback?: () => void
   ) => {
     try {
-      const data = await createProduct(newProduct);
-      setProducts((currentProducts: ProductListData) => currentProducts.concat(data));
+      const data = await updateProduct(updatedProduct, productId);
+      setProducts((prevState) => {
+        return prevState.map((product) => {
+          if (product._id === data._id) {
+            return data;
+          } else {
+            return product;
+          }
+        });
+      });
       if (callback) {
         callback();
       }
-    } catch (e: unknown) {
+    } catch (e) {
+      console.error(e);
+    }
+  };
+  const handleAddProduct = async (
+    newProduct: BaseProduct,
+    callback?: () => void
+  ) => {
+    try {
+      const data = await addProduct(newProduct);
+      setProducts((prevState) => prevState.
+        concat(data));
+      if (callback) {
+        callback();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  const handleDeleteProduct = async (productId: string) => {
+    try {
+      await deleteProduct(productId);
+      setProducts((prevState) =>
+        prevState.filter((product) => product._id !== productId)
+      );
+    } catch (e) {
+      console.error(e);
+    }
+  };
+  const handleCheckout = async () => {
+    try {
+      await checkout();
+      setCartItems([]);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+  const handleAddToCart = async (productId: string) => {
+    const product = products.find((product) => product.
+      _id === productId);
+    const existingItem = cartItems.find(
+      (cartItem) => cartItem.productId === productId
+    );
+    if (!product || product.quantity === 0) return;
+    try {
+      const { product: updatedProduct, item } = await addToCart(productId);
+      setProducts((prevState) => {
+        return prevState.map((product) => {
+          if (product._id === updatedProduct._id) {
+            return updatedProduct;
+          } else {
+            return product;
+          }
+        });
+      });
+      setCartItems((prevState) => {
+        if (existingItem) {
+          return prevState.map((cartItem) => {
+            if (cartItem.productId === productId) {
+              return item;
+            } else {
+              return cartItem;
+            }
+          });
+        } else {
+          return prevState.concat(item);
+        }
+      });
+    } catch (e) {
       console.error(e);
     }
   };
 
-
   return (
     <div id="app">
-      <Header title="the shop!" cartItems={[]} />
-
+      <ShoppingCart cartItems={cartItems} onCheckout={handleCheckout} />
       <main>
-        <ProductList products={products} />
-        <AddProductSection onSubmit={handleSubmit} />
+        <ProductListing
+          onAddToCart={handleAddToCart}
+          products={products}
+          onUpdateProduct={handleUpdateProduct}
+          onDeleteProduct={handleDeleteProduct}
+        />
+        <ToggleableAddProductForm onAddProduct={handleAddProduct} />
       </main>
     </div>
-  )
+  );
 }
 
 export default App

@@ -1,52 +1,55 @@
-import type { ProductRecord } from '../types/index.ts'
+import { useState } from "react";
+import ProductForm from "./ProductForm";
+import { BaseProduct, Product } from "../types";
 
-type EditProductFormProps = {
-  product: ProductRecord
-  onCancel: () => void
+interface EditProductFormProps extends Product {
+  onToggleEdit: () => void;
+  onUpdateProduct: (
+    updatedProduct: BaseProduct,
+    productId: string,
+    onToggleEdit: () => void
+  ) => void;
 }
 
-const EditProductForm = ({ product, onCancel }: EditProductFormProps) => {
+const EditProductForm = ({
+  _id,
+  title: propTitle,
+  price: propPrice,
+  quantity: propQuantity,
+  onToggleEdit,
+  onUpdateProduct,
+}: EditProductFormProps) => {
+  const [title, setTitle] = useState(propTitle || "");
+  const [price, setPrice] = useState(propPrice || 0);
+  const [quantity, setQuantity] = useState(propQuantity || 0);
+
+  const handleSubmit = (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    const updatedProduct = {
+      title,
+      price,
+      quantity,
+    };
+
+    onUpdateProduct(updatedProduct, _id, onToggleEdit);
+  };
+
   return (
-    <>
+    <div className="edit-form">
       <h3>Edit Product</h3>
-      <form>
-        <div className="input-group">
-          <label htmlFor={`product-name-${product._id}`}>Product Name</label>
-          <input
-            type="text"
-            id={`product-name-${product._id}`}
-            defaultValue={product.title}
-            aria-label="Product Name"
-          />
-        </div>
+      <ProductForm
+        title={title}
+        price={price}
+        quantity={quantity}
+        setTitle={setTitle}
+        setPrice={setPrice}
+        setQuantity={setQuantity}
+        onSubmit={handleSubmit}
+        onToggleForm={onToggleEdit}
+        buttonLabel="Update"
+      />
+    </div>
+  );
+};
 
-        <div className="input-group">
-          <label htmlFor={`product-price-${product._id}`}>Price</label>
-          <input
-            type="number"
-            id={`product-price-${product._id}`}
-            defaultValue={product.price}
-            aria-label="Product Price"
-          />
-        </div>
-
-        <div className="input-group">
-          <label htmlFor={`product-quantity-${product._id}`}>Quantity</label>
-          <input
-            type="number"
-            id={`product-quantity-${product._id}`}
-            defaultValue={product.quantity}
-            aria-label="Product Quantity"
-          />
-        </div>
-
-        <div className="actions form-actions">
-          <button type="submit">Update</button>
-          <button type="button" onClick={onCancel}>Cancel</button>
-        </div>
-      </form>
-    </>
-  )
-}
-
-export default EditProductForm
+export default EditProductForm;
