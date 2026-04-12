@@ -26,7 +26,7 @@ const AddProductForm = ({
    };
 
    return (
-      <div className="add-form">
+      <div className="add-form visible">
          <ProductForm
             title={title}
             price={price}

@@ -35,7 +35,7 @@ const EditProductForm = ({
   };
 
   return (
-    <div className="edit-form">
+    <div className="edit-form visible">
       <h3>Edit Product</h3>
       <ProductForm
         title={title}
