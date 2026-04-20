@@ -1,8 +1,12 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useReducer } from "react";
 import ToggleableAddProductForm from "./components/ToggleableAddProductForm";
 import ShoppingCart from "./components/ShoppingCart";
 import ProductListing from './components/ProductListing';
+import productsReducer from "./reducers/productsReducer.tsx"
+import cartItemsReducer from "./reducers/cartItemsReducer.tsx"
 import { Product, CartItem, BaseProduct } from "./types";
+import { ThemeContext } from "./providers/ThemeProvider.jsx";
+
 import {
   getProducts,
   addProduct,
@@ -14,22 +18,27 @@ import {
 } from "./services/products";
 
 function App() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [products, dispatchProducts] = useReducer(productsReducer, [] as Product[]);
+  const [cartItems, dispatchCartItems] = useReducer(cartItemsReducer, [] as CartItem[]);
+  const { theme } = useContext(ThemeContext);
 
   useEffect(() => {
     const fetchProducts = async () => {
-      // kass
       const data = await getProducts();
-      setProducts(data);
+      dispatchProducts({
+        type: 'productsLoaded',
+        payload: data,
+      });
     };
     const fetchCartItems = async () => {
       const data = await getCartItems();
-      setCartItems(data);
+      dispatchCartItems({
+        type: 'cartItemsLoaded',
+        payload: data,
+      });
     };
 
     try {
-      // kass
       fetchProducts();
       fetchCartItems();
     } catch (e) {
@@ -45,14 +54,9 @@ function App() {
   ) => {
     try {
       const data = await updateProduct(updatedProduct, productId);
-      setProducts((prevState) => {
-        return prevState.map((product) => {
-          if (product._id === data._id) {
-            return data;
-          } else {
-            return product;
-          }
-        });
+      dispatchProducts({
+        type: 'updateProduct',
+        payload: data,
       });
       if (callback) {
         callback();
@@ -67,8 +71,11 @@ function App() {
   ) => {
     try {
       const data = await addProduct(newProduct);
-      setProducts((prevState) => prevState.
-        concat(data));
+      dispatchProducts({
+        type: 'addProduct',
+        payload: data,
+      });
+
       if (callback) {
         callback();
       }
@@ -79,9 +86,10 @@ function App() {
   const handleDeleteProduct = async (productId: string) => {
     try {
       await deleteProduct(productId);
-      setProducts((prevState) =>
-        prevState.filter((product) => product._id !== productId)
-      );
+      dispatchProducts({
+        type: 'deleteProduct',
+        payload: productId,
+      });
     } catch (e) {
       console.error(e);
     }
@@ -89,7 +97,9 @@ function App() {
   const handleCheckout = async () => {
     try {
       await checkout();
-      setCartItems([]);
+      dispatchCartItems({
+        type: 'cartItemsCheckedOut',
+      });
     } catch (e) {
       console.error(e);
     }
@@ -103,35 +113,28 @@ function App() {
     if (!product || product.quantity === 0) return;
     try {
       const { product: updatedProduct, item } = await addToCart(productId);
-      setProducts((prevState) => {
-        return prevState.map((product) => {
-          if (product._id === updatedProduct._id) {
-            return updatedProduct;
-          } else {
-            return product;
-          }
+      dispatchProducts({
+        type: "updateProduct",
+        payload: updatedProduct,
+      });
+      if (existingItem) {
+        dispatchCartItems({
+          type: "updateCartItem",
+          payload: item,
         });
-      });
-      setCartItems((prevState) => {
-        if (existingItem) {
-          return prevState.map((cartItem) => {
-            if (cartItem.productId === productId) {
-              return item;
-            } else {
-              return cartItem;
-            }
-          });
-        } else {
-          return prevState.concat(item);
-        }
-      });
+      } else {
+        dispatchCartItems({
+          type: "addCartItem",
+          payload: item,
+        });
+      }
     } catch (e) {
       console.error(e);
     }
   };
 
   return (
-    <div id="app">
+    <div id="app" data-theme={theme}>    <!-- data attr for theme -->
       <ShoppingCart cartItems={cartItems} onCheckout={handleCheckout} />
       <main>
         <ProductListing

@@ -4,7 +4,7 @@ interface CartItemProps extends CartItemType { }
 
 const CartItem = ({ title, quantity, price }: CartItemProps) => {
   return (
-    <tr data-testiid={`cartItem-${title}`}>
+    <tr data-testid={`cartItem-${title}`}>
       <td>{title}</td>
       <td>{quantity}</td>
       <td>{price}</td>
